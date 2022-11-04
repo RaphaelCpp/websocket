@@ -76,6 +76,7 @@
   var socket = io();
   const pseudo = prompt('Choisissez votre pseudo');
   const channel = prompt('Choisissez votre canal ? ');
+  const myTimer = setTimeout(() => { })
 
   socket.emit('new_co', { channel: channel, pseudo: pseudo });
 
@@ -85,9 +86,10 @@
   });
 
   socket.on('is_typing', (data) => {
+    clearTimeout(myTimer)
     document.getElementById('is_typing').innerHTML = ""
     document.getElementById('is_typing').innerHTML += data.pseudo + " " + data.message;
-    setTimeout(function () {
+    myTimer = setTimeout(function () {
       document.getElementById('is_typing').innerHTML = "";
     }, 3000)
   });
