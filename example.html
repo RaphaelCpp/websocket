@@ -76,22 +76,14 @@
   var socket = io();
   const pseudo = prompt('Choisissez votre pseudo');
   const channel = prompt('Choisissez votre canal ? ');
-  const myTimer = setTimeout(() => { })
+  let myTimer = setTimeout(() => { });
+  let personTyping = [];
+  let uniquePersonTyping = [];
 
   socket.emit('new_co', { channel: channel, pseudo: pseudo });
 
   socket.on('new_message', (data) => {
-    console.log(data);
     document.getElementById('messages').innerHTML += `<li> ${data}</li>`;
-  });
-
-  socket.on('is_typing', (data) => {
-    clearTimeout(myTimer)
-    document.getElementById('is_typing').innerHTML = ""
-    document.getElementById('is_typing').innerHTML += data.pseudo + " " + data.message;
-    myTimer = setTimeout(function () {
-      document.getElementById('is_typing').innerHTML = "";
-    }, 3000)
   });
 
   document.getElementById('form').addEventListener('submit', function (e) {
@@ -102,14 +94,20 @@
     input.value = "";
   });
 
-  input.addEventListener('keyup', (e) => {
-    let text = "est entrain d\'écrire";
-    if (e.target.value) {
-      socket.emit('is_typing', text);
-    } else {
-      text = "";
-      socket.emit('is_typing', text);
-    }
+  document.getElementById('input').addEventListener('keyup', (e) => {
+    socket.emit('is_typing', { user: pseudo });
+  });
+
+  socket.on('is_typing', (data) => {
+    personTyping.push(data.user);
+    uniquePersonTyping = [...new Set(personTyping)];
+    document.getElementById('is_typing').innerHTML = `${uniquePersonTyping.join(', ')} est en train d'écrire...`;
+    clearTimeout(myTimer);
+    myTimer = setTimeout(() => {
+      personTyping = [];
+      uniquePersonTyping = [];
+      document.getElementById('is_typing').innerHTML = '';
+    }, 2000);
   });
 
 </script>
